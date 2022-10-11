@@ -1,0 +1,73 @@
+#+PROPERTY: header-args:shell :var DATASET="enwiki-2022"
+
+* Prerequisites
+
+Get all submodules:
+#+begin_src shell
+git submodule update --init --recursive
+#+end_src
+
+You will need a JDK, for macOS this could be as simple as:
+#+begin_src shell
+brew install openjdk ant ivy
+#+end_src
+
+Follow the instructions in [[./webgraph/README.md]]
+
+* Overview
+
+The dataset menu is here:
+https://law.di.unimi.it/datasets.php
+
+Tutorial:
+https://law.di.unimi.it/tutorial.php
+
+* Getting a DATASET
+
+#+begin_src shell
+
+DATASET="enwiki-2022"
+
+for ext in .properties .graph .md5sums; do
+    wget -P law/"$DATASET" -c http://data.law.di.unimi.it/webdata/"$DATASET"/"$DATASET$ext"
+done
+
+#+end_src
+
+* Convert to ASCIIGraph
+
+API Documentation:
+https://webgraph.di.unimi.it/docs/it/unimi/dsi/webgraph/ASCIIGraph.html
+
+#+begin_src shell
+source webgraph/setcp.sh
+
+cd datasets/"$DATASET"
+
+# For neighbor list
+java it.unimi.dsi.webgraph.ASCIIGraph "$DATASET" "$DATASET"
+
+# For edgle list
+java it.unimi.dsi.webgraph.ArcListASCIIGraph "$DATASET" "$DATASET".el
+#+end_src
+
+* Counting number of edges
+
+#+begin_src shell
+wc -l ./datasets/"$DATASET"/"$DATASET".el
+#+end_src
+
+* Mapping node to/from urls
+
+#+begin_src shell :results raw
+wget -P datasets/"$DATASET" -c http://data.law.di.unimi.it/webdata/"$DATASET"/"$DATASET".ids.gz
+gunzip datasets/"$DATASET"/"$DATASET".ids.gz
+#+end_src
+
+#+begin_src shell :results raw
+
+# WARNING: line number is node + 1
+rg -n "Chalmers University of Technology" datasets/"$DATASET"/"$DATASET".ids
+sed -n 324714p datasets/"$DATASET"/"$DATASET".ids
+
+#+end_src
